@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Div update and show">
+    <aura:attribute name="objectName" type="String"/>
+    <aura:attribute name="objectLabel" type="String"/>
+</aura:event>

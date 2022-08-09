@@ -1,0 +1,15 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" >
+    <aura:attribute name="options" type="List" default="[]"/>
+    <aura:attribute name="values" type="List" default="[]"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+    <div class="slds-m-around_xx-small">
+    	<lightning:dualListbox name="multipleOptions"  
+                               label= "Select Profile/Permission Set" 
+                               sourceLabel="Available Profiles/Permission Sets" 
+                               selectedLabel="Selected Profiles/Permission Sets" 
+                               options="{!v.options}" 
+                               value="{!v.values}" 
+                               onchange="{! c.handleChange }"/>
+    </div>
+</aura:component>

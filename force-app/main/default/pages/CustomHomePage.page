@@ -1,0 +1,87 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-14-2021
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<apex:page controller="UserProfileAcces">
+
+    <head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/jquery.min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/bootstrap/bootstrap.min.js')}"/>
+		<apex:slds />
+	</head>
+	<style type="text/css">
+		.custPopup{
+			background-color: white;
+			border-width: 2px;
+			border-style: solid;
+			z-index: 9999;
+			left: 50%;
+			padding:20px;
+			position: fixed;
+			font-size: 100%;
+			/* These are the 3 css properties you will need to change so the popup 
+			displays in the center of the screen. First set the width. Then set 
+			margin-left to negative half of what the width is. You can add 
+			the height property for a fixed size pop up if you want.*/
+			width: 600px;
+			margin-left: -250px;
+			top:100px;
+		}
+		.popupBackground{
+			background-color:black;
+			opacity: 0.20;
+			filter: alpha(opacity = 20);
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			z-index: 9998;
+		}
+
+	</style>
+	<body>
+
+    <apex:form id="theForm">
+	<div class="slds-scope">
+    <div class="slds-page-header">
+        <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+            <div class="slds-p-horizontal_small slds-size_1-of-1">
+                <table class="slds-table slds-table_bordered " width="100%">
+                    <thead>
+                        <tr>
+                            <th scope="col" style="text-align: left">
+                                <div class="slds-truncate" title="Application Perfection">
+                                    <apex:image id="theLogoImage" value="{!$Resource.logoApplicationPerfection}" width="200" height="20"/>
+                                </div>
+                            </th>
+                            <th scope="col" style="text-align:right">
+                                    <apex:commandLink value="Help/Training" action="{!openHelpTraining}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                    <apex:commandLink value="Request a feature/support" action="{!openContactUSLink}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                    <apex:commandLink value="Release Notes" action="{!openReleaseNotes}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                            </th>
+                            <th scope="col" style="text-align: right; width: 160px;">
+                                <div class="slds-truncate" title="Security & Access Manager">
+                                    <apex:image id="theImage" value="{!$Resource.logo}" width="150" height="20"/>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+
+    <div style="text-align: center; margin-top: 100px;">
+        <apex:image id="theAppLogo" value="{!$Resource.logo}" width="300" height="200"/>
+    </div>
+</div>
+</apex:form>
+</body>
+</apex:page>

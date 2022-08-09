@@ -1,0 +1,637 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-14-2021
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<apex:page controller="ObjectAccess" sidebar="false" showHeader="true" docType="HTML-5.0" standardStylesheets="false" lightningStyleSheets="true">
+    <head>
+        <title>Profile page</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        <apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/jquery.min.js')}"/>
+        <apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/bootstrap/bootstrap.min.js')}"/>
+        <apex:slds />
+    </head>
+    <style type="text/css">
+        .custPopup{
+            background-color: white;
+            border-width: 2px;
+            border-style: solid;
+            z-index: 9999;
+            left: 50%;
+            padding:20px;
+            position: fixed;
+            font-size: 100%;
+            /* These are the 3 css properties you will need to change so the popup 
+            displays in the center of the screen. First set the width. Then set 
+            margin-left to negative half of what the width is. You can add 
+            the height property for a fixed size pop up if you want.*/
+            width: 600px;
+            margin-left: -250px;
+            top:100px;
+        }
+        .popupBackground{
+            background-color:black;
+            opacity: 0.20;
+            filter: alpha(opacity = 20);
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9998;
+        }
+        
+        /*.table-scroll {
+            background: color;
+            height: 500px;
+            table-layout: fixed;
+            white-space: normal
+        }
+
+        .table-scroll tbody {
+            position: absolute;
+            overflow-y: scroll;
+            height: 450px;
+            background-color: inherit;
+            
+        }
+
+        .table-scroll tr {
+            width: 100%;
+            table-layout: fixed;
+            display: inline-table;
+            background-color: inherit;
+        }
+        
+        .table-scroll thead > tr > th {
+            border: none;
+            table-layout: fixed;
+            white-space: normal
+            display: table-cell;
+            word-wrap: break-all;
+        }*/
+    </style>
+    <script type="text/javascript">
+        function selectAllCheckboxes(obj,receivedInputID){
+            var inputCheckBox = document.getElementsByTagName("input");
+            for(var i=0; i<inputCheckBox.length; i++){
+                if(inputCheckBox[i].id.indexOf(receivedInputID)!=-1){
+                    inputCheckBox[i].checked = obj.checked;
+                }
+            }
+        }
+        function uncheckAllCheckboxes(obj, section){
+            var inputCheckBox = document.getElementsByTagName("input");
+            if(!obj.checked && section == 'read'){
+                for(var i=0; i<inputCheckBox.length; i++){
+                    if(inputCheckBox[i].id.indexOf('createCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                    if(inputCheckBox[i].id.indexOf('editCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                    if(inputCheckBox[i].id.indexOf('deleteCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                    if(inputCheckBox[i].id.indexOf('viewAllCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                    if(inputCheckBox[i].id.indexOf('modifyAllCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                }
+            }
+            else if(!obj.checked && section == 'delete'){
+                for(var i=0; i<inputCheckBox.length; i++){
+                    if(inputCheckBox[i].id.indexOf('modifyAllCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                }
+            }
+            else if(!obj.checked && section == 'edit'){
+                for(var i=0; i<inputCheckBox.length; i++){
+                    if(inputCheckBox[i].id.indexOf('modifyAllCheckID')!=-1){
+                        inputCheckBox[i].checked = obj.checked;
+                    }
+                }
+            }
+        }
+        
+        
+        
+    </script>
+     
+    
+    <body>
+    
+    <apex:form id="theForm">
+    <div class="slds-scope">
+        <div class="slds-page-header">
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-1">
+                    <table class="slds-table slds-table_bordered " width="100%">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="text-align: left">
+                                    <div class="slds-truncate" title="Application Perfection">
+                                        <apex:image id="theLogoImage" value="{!$Resource.logoApplicationPerfection}" width="200" height="20"/>
+                                    </div>
+                                </th>
+                                <th scope="col" style="text-align:right">
+                                        <apex:commandLink value="Help/Training" action="{!openHelpTraining}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                   
+                                        <apex:commandLink value="Request a feature/support" action="{!openContactUSLink}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                    
+                                        <apex:commandLink value="Release Notes" action="{!openReleaseNotes}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>                                    
+                                </th>
+                                <th scope="col" style="text-align: right; width: 160px;">
+                                    <div class="slds-truncate" title="Security & Access Manager">
+                                        <apex:image id="theImage" value="{!$Resource.logo}" width="150" height="20"/>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <apex:outputPanel id="errorSection">
+            <apex:pageMessages />
+        </apex:outputPanel>
+    
+        <apex:outputPanel id="selectionTable" rendered="{!existCustomProfiles && isAccessible}">
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_2-of-10">
+                    Type of the permission:
+                </div>
+                <div class="slds-p-horizontal_small slds-size_3-of-10" style="width: 100%">
+                    <apex:selectList value="{!selectedPerm}" size="1" styleClass="slds-select">
+                        <apex:selectOptions value="{!PermissionType}"/>
+                        <apex:actionSupport event="onchange" rerender="theForm, selectionTable" action="{!changePermType}" status="tableStatus"/>
+                    </apex:selectList>
+                </div>
+            </div>
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-size_1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2" >
+                    <c:MultiselectPicklist leftLabel="Available Profiles/Permission Sets"
+                        leftOption="{!remainingProfiles}"
+                        leftOption1="{!remainingProfiles1}"
+                        rightLabel="Selected Profiles/Permission Sets"
+                        rightOption="{!selectedProfiles}"
+                        size="6"
+                        width="250px" id="multiSelectList"/>
+                </div>
+                <div class="slds-size_1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+                    <br/>
+                    <table width="100%">
+                        <tr>
+                            <td style="text-align: left">
+                                Type of the object: <br></br>
+                                <apex:selectList value="{!selectedType}" size="1" id="IdOfSelectType" styleClass="slds-select">
+                                    <apex:selectOptions value="{!objectsType}"/>
+                                    <apex:actionSupport event="onchange" rerender="theForm, selectionTable" action="{!changeType}" status="tableStatus"/>
+                                </apex:selectList>
+                            </td>
+                            <td style="text-align: left">
+                                Please select an object: <br></br>
+                                <apex:selectList value="{!selectedObject}" size="1" id="IdOfSelectElement" styleClass="slds-select">
+                                    <apex:selectOptions value="{!objectsNameList}"/>
+                                    <apex:selectOptions value="{!objectsNameList1}"/>
+                                    <apex:actionSupport event="onchange" rerender="selectionTable, profilesTable, errorSection, buttonSection, descriptionId" action="{!changeObject}" status="tableStatus"/>
+                                </apex:selectList>
+                            </td>
+                            <td>
+                                <apex:outputPanel id="selectLog" rendered="{!canChange}">
+                                    Please select a saved log:<br></br>
+                                    <apex:selectList value="{!selectedLog}" size="1" styleClass="slds-select">
+                                        <apex:selectOptions value="{!optionsLog}"/>
+                                        <apex:actionSupport event="onchange" rerender="selectionTable, profilesTable, errorSection, buttonSection " action="{!changeLog}" status="tableStatus"/>
+                                    </apex:selectList>
+                                </apex:outputPanel>
+                            </td>
+                        </tr>
+                        <tr>
+                            <apex:outputPanel rendered="{!canChange}" id="descriptionId" layout="none">
+                                <td style="text-align: left" colspan="3">
+                                    <br/>
+                                    Description of change: <br></br>
+                                    <apex:inputTextarea id="newDesc" value="{!description}" rows="1" style="width: 400px;" styleClass="slds-input"/>
+                                </td>
+                            </apex:outputPanel>
+                        </tr>
+                        <tr>
+                            <td>
+                                <br/>
+                                <apex:commandButton action="{!Go}" value="Go" rerender="multiSelectList, buttonSection, profilesTable,errorSection, selectLog" status="tableStatus" style="width: 60px;" styleClass="slds-button slds-button--brand" oncomplete="renderSVG();"/>
+                            </td>
+                            <td style="text-align: left" colspan="2">
+                                <br/>
+                                <apex:outputPanel rendered="{!isAccessible && objectsNameList.size > 0}" id="buttonSection">
+                                    <div style="width: 120%; text-align: left">
+                                        <apex:commandButton action="{!Save}" value="Save" rerender="profilesTable,errorSection, selectionTable" status="tableStatus" rendered="{!selectedLog == '-- Please select --' && canChange}" styleClass="slds-button slds-button_success" id="saveButton"/>
+                                        <apex:commandButton action="{!RevertChanges}" status="tableStatus" rerender="profilesTable, errorSection" value="Revert Changes" style="width: 140px;" rendered="{!selectedLog != '-- Please select --' && canChange}" styleClass="slds-button slds-button_success" id="revertButton"/>
+                                        <apex:commandButton action="{!yesPopUp}" value="Select Object for Export to Excel" reRender="tstpopup, errorMessage" status="tableStatus" rendered="{!selectedLog == '-- Please select --'}" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                        <apex:commandButton action="{!ExportToExcel}" value="Export To Excel" rendered="{!selectedLog != '-- Please select --'}" status="tableStatus" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                        <!-- <apex:commandButton action="{!printPDF}" value="PDF"/> -->
+                                        <apex:commandLink value="Generate PDF" action="{!printPDF}"  immediate="true" target="_blank" style="text-decoration:none" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                        <!--<a href="/apex/ObjectAccessPDF" class="btn" style="text-decoration:none" onclick="window.open(this.href, 'mywin', 'height=400,width=300'); return false;" >Pure HTML version, should be a popup</a>-->
+                                        
+                                    </div>
+                                </apex:outputPanel>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </apex:outputPanel>
+        <apex:actionStatus id="tableStatus" layout="block" rendered="{!isAccessible}">
+            <apex:facet name="start">
+                <p >
+                    <div class="slds-spinner_container slds-is-fixed">
+                        <div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+                            <span class="slds-assistive-text">Loading</span>
+                            <div class="slds-spinner__dot-a"></div>
+                            <div class="slds-spinner__dot-b"></div>
+                        </div>
+                    </div>
+                </p>
+            </apex:facet>
+            <apex:facet name="stop"></apex:facet>
+        </apex:actionStatus>
+        <br/>
+        <apex:outputPanel id="profilesTable" rendered="{!objectsNameList.size > 0 && existCustomProfiles && isAccessible}"> 
+        <!-- Object Permission table -->
+            <apex:outputPanel rendered="{!selectedLog == '-- Please select --'}">
+                <div class="slds-table--header-fixed_container" style="height:450px;">
+                    <div class="slds-scrollable_y" style="height:100%;">
+                        <table class="slds-table slds-table_bordered slds-table_striped slds-table--header-fixed">
+                            <thead style="background: lightgrey;">
+                                <tr class="slds-text-title_caps">
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Profile Name">
+                                            Profile Name<br/>&nbsp;
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="User License">
+                                            User License<br/>&nbsp;
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Read" >Read &nbsp; <br/>
+                                            &nbsp;&nbsp;<apex:inputCheckbox onclick="selectAllCheckboxes(this,'readCheckID')" rendered="{!canChange}"/>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Create">Create &nbsp; <br/>
+                                            &nbsp;&nbsp;<apex:inputCheckbox onclick="selectAllCheckboxes(this,'createCheckID')" rendered="{!canChange}"/>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Edit">Edit &nbsp; <br/>
+                                            &nbsp;&nbsp;<apex:inputCheckbox onclick="selectAllCheckboxes(this,'editCheckID')" rendered="{!canChange}"/>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Delete">Delete &nbsp; <br/>
+                                            &nbsp;&nbsp;<apex:inputCheckbox onclick="selectAllCheckboxes(this,'deleteCheckID')" rendered="{!canChange}"/>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="View All">View All &nbsp; <br/>
+                                            &nbsp;&nbsp;<apex:inputCheckbox onclick="selectAllCheckboxes(this,'viewAllCheckID')" rendered="{!canChange}"/>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Modify All">Modify All &nbsp; <br/>
+                                            &nbsp;&nbsp;<apex:inputCheckbox onclick="selectAllCheckboxes(this,'modifyAllCheckID')" rendered="{!canChange}"/>
+                                        </div>
+                                    </th>
+                                    <!-- <th>Review?</th>
+                                    <th>Approved</th>-->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <apex:variable var="index" value="{!0}" />
+                                <apex:repeat value="{!profileWList}" var="p">
+                                    <tr>
+                                        <td data-label="Profile Name">
+                                            <div class="slds-truncate " title="Profile Name">
+                                            	<apex:outputlink value="/{!p.profId}" target="_blank">
+                                                	<apex:outputText value="{!HTMLENCODE(profileMap[p.profId])}" escape="false"/>
+                                               	</apex:outputlink>
+                                            </div>
+                                        </td>
+                                        <td data-label="User License">
+                                            <div class="slds-truncate" title="User License">
+                                                <apex:outputText value="{!IF(p.profUserLicenseId != null,userLicenseMap[p.profUserLicenseId].Name, '')}" rendered="{!userLicenseNotAccessible}"/>
+                                            </div>
+                                        </td>
+                                        <td data-label="Read">
+                                            <div class="slds-truncate" title="Read">
+                                                <apex:inputCheckbox value="{!p.objPerm.R}" disabled="{!IF(canChange && !CONTAINS(standardProfileIds, p.profId), false, true)}" id="readCheckID" onclick="uncheckAllCheckboxes(this, 'read')"/> &nbsp;&nbsp; 
+                                            </div>
+                                        </td>
+                                        <td data-label="Create">
+                                            <div class="slds-truncate" title="Create">
+                                                <apex:inputCheckbox value="{!p.objPerm.C}" disabled="{!IF(canChange && !CONTAINS(standardProfileIds, p.profId), false, true)}" id="createCheckID"/> &nbsp;&nbsp;
+                                            </div>
+                                        </td>
+                                        <td data-label="Edit">
+                                            <div class="slds-truncate" title="Edit">
+                                                <apex:inputCheckbox value="{!p.objPerm.E}" disabled="{!IF(canChange && !CONTAINS(standardProfileIds, p.profId), false, true)}" id="editCheckID" onclick="uncheckAllCheckboxes(this, 'edit')"/>&nbsp;&nbsp;
+                                            </div>
+                                        </td>
+                                        <td data-label="Delete">
+                                            <div class="slds-truncate" title="Delete">
+                                                <apex:inputCheckbox value="{!p.objPerm.D}" disabled="{!IF(canChange && !CONTAINS(standardProfileIds, p.profId), false, true)}" id="deleteCheckID" onclick="uncheckAllCheckboxes(this, 'delete')"/>&nbsp;&nbsp;
+                                            </div>
+                                        </td>
+                                        <td data-label="View All">
+                                            <div class="slds-truncate" title="View All">
+                                                <apex:inputCheckbox value="{!p.objPerm.V}" disabled="{!IF(canChange && !CONTAINS(standardProfileIds, p.profId), false, true)}" id="viewAllCheckID"/>&nbsp;&nbsp;
+                                            </div>
+                                        </td>
+                                        <td data-label="Modify All">
+                                            <div class="slds-truncate" title="Modify All">
+                                                <apex:inputCheckbox value="{!p.objPerm.M}" disabled="{!IF(canChange && !CONTAINS(standardProfileIds, p.profId), false, true)}" id="modifyAllCheckID"/>&nbsp;&nbsp;
+                                            </div>
+                                        </td>
+                                       
+
+                                    </tr>
+                                    <apex:variable var="index" value="{!index+1}" />
+                                </apex:repeat>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </apex:outputPanel>
+        <!-- Object Permission LOG table -->
+            <apex:outputPanel rendered="{!selectedLog != '-- Please select --'}">
+                <div class="slds-table--header-fixed_container" style="height:450px;">
+                    <div class="slds-scrollable_y" style="height:100%;">
+                        <table class="slds-table slds-table_bordered slds-table_striped slds-table--header-fixed">
+                            <thead style="background: lightgrey;">
+                                <tr>
+                                    <th scope="col" class="slds-text-title_caps">
+                                        <div class="slds-truncate slds-cell-fixed" title="Profile Name" style="width: 40%">
+                                            Profile Name<br/>&nbsp;
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="slds-text-title_caps">
+                                        <div class="slds-truncate slds-cell-fixed" title="User License" style="width: 12%">
+                                            User License<br/>&nbsp;
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Read" style="width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center;">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-1 slds-text-title_caps">
+                                                    Read
+                                                </div>
+                                            </div>
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: right">
+                                                    Now
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: left">
+                                                    Log
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Create" style="width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center;">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-1 slds-text-title_caps">
+                                                    Create
+                                                </div>
+                                            </div>
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: right">
+                                                    Now
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: left">
+                                                    Log
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Edit" style="width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center;">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-1 slds-text-title_caps">
+                                                    Edit
+                                                </div>
+                                            </div>
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: right">
+                                                    Now
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: left">
+                                                    Log
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Delete" style="width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center;">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-1 slds-text-title_caps">
+                                                    Delete
+                                                </div>
+                                            </div>
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: right">
+                                                    Now
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: left">
+                                                    Log
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="View All" style="width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center;">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-1 slds-text-title_caps">
+                                                    View All
+                                                </div>
+                                            </div>
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: right">
+                                                    Now
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: left">
+                                                    Log
+                                                </div>
+                                                
+                                            </div>
+                                        </div>
+                                    </th>
+                                    <th scope="col">
+                                        <div class="slds-truncate slds-cell-fixed" title="Modify All" style="width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center;">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-1 slds-text-title_caps">
+                                                    Modify All
+                                                </div>
+                                            </div>
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: right">
+                                                    Now
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: left">
+                                                    Log
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </th>
+                                   
+                                    <!-- <th>Review?</th>
+                                    <th>Approved</th>-->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <apex:variable var="index" value="{!0}" />
+                                <apex:repeat value="{!profileWList}" var="p">
+                                    <tr>
+                                        <td data-label="Profile Name" style="width: 40%">
+                                            <div class="slds-truncate " title="Profile Name" style="width: 100%">
+                                                <apex:outputText value="{!HTMLENCODE(profileMap[p.profId])}" escape="false"/>
+                                            </div>
+                                        </td>
+                                        <td data-label="User License" style="width: 12%">
+                                            <div class="slds-truncate" title="User License">
+                                                <apex:outputText value="{!IF(p.profUserLicenseId != null,userLicenseMap[p.profUserLicenseId].Name, '')}" rendered="{!userLicenseNotAccessible}"/>
+                                            </div>
+                                        </td>
+                                        <td data-label="Read" style="background-color: {!IF(p.objPerm.R != profileWSaveList[index].objPerm.R,'#FFC7CE','')}; width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2">
+                                                    <div class="slds-truncate slds-text-align_right" title="Read">
+                                                        <apex:inputCheckbox value="{!p.objPerm.R}" style="pointer-events: none;" id="readCheckID"/>
+                                                    </div>
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2">
+                                                    <div class="slds-truncate slds-text-align_left" title="Log Read">
+                                                        <apex:inputCheckbox value="{!profileWSaveList[index].objPerm.R}" style="pointer-events: none;"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-label="Create" style="background-color: {!IF(p.objPerm.C != profileWSaveList[index].objPerm.C,'#FFC7CE','')}; width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_right" title="Create">
+                                                    <apex:inputCheckbox value="{!p.objPerm.C}" style="pointer-events: none;" id="createCheckID"/>
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_left" title="LOG Create">
+                                                    <apex:inputCheckbox value="{!profileWSaveList[index].objPerm.C}" style="pointer-events: none;"/>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-label="Edit" style="background-color: {!IF(p.objPerm.E != profileWSaveList[index].objPerm.E,'#FFC7CE','')}; width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_right" title="Edit">
+                                                    <apex:inputCheckbox value="{!p.objPerm.E}" style="pointer-events: none;" id="editCheckID"/>
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_left" title="LOG Edit">
+                                                    <apex:inputCheckbox value="{!profileWSaveList[index].objPerm.E}" style="pointer-events: none;"/>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-label="Delete" style="background-color: {!IF(p.objPerm.D != profileWSaveList[index].objPerm.D,'#FFC7CE','')}; width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_right" title="Delete">
+                                                    <apex:inputCheckbox value="{!p.objPerm.D}" style="pointer-events: none;" id="deleteCheckID"/>
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_left" title="LOG Delete">
+                                                    <apex:inputCheckbox value="{!profileWSaveList[index].objPerm.D}" style="pointer-events: none;"/>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-label="View All" style="background-color: {!IF(p.objPerm.V != profileWSaveList[index].objPerm.V,'#FFC7CE','')}; width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_right" title="View All">
+                                                    <apex:inputCheckbox value="{!p.objPerm.V}" style="pointer-events: none;" id="viewAllCheckID"/>
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_left" title="LOG View All">
+                                                    <apex:inputCheckbox value="{!profileWSaveList[index].objPerm.V}" style="pointer-events: none;"/>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td data-label="Modify All" style="background-color: {!IF(p.objPerm.M != profileWSaveList[index].objPerm.M,'#FFC7CE','')}; width: 8%">
+                                            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_right" title="Modify All">
+                                                    <apex:inputCheckbox value="{!p.objPerm.M}"  id="modifyAllCheckID" style="pointer-events: none;"/>
+                                                </div>
+                                                <div class="slds-p-horizontal_small slds-size_1-of-2 slds-text-align_left" title="LOG Modify All">
+                                                    <apex:inputCheckbox value="{!profileWSaveList[index].objPerm.M}" style="pointer-events: none;"/>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <!--<td><apex:inputCheckbox /></td>
+                                        <td><apex:inputCheckbox /></td>-->
+                                    </tr>
+                                    <apex:variable var="index" value="{!index+1}" />
+                                </apex:repeat>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </apex:outputPanel>
+        </apex:outputPanel>
+        
+        <apex:outputPanel id="tstpopup">
+            <apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+            <apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+                <c:MultiselectPicklist leftLabel="Available Objects"
+                    leftOption="{!objectsNameList}"
+                    leftOption1=""
+                    rightLabel="Selected Objects"
+                    rightOption="{!selectedObjectsList}"
+                    size="8"
+                    width="180px"/>
+                <apex:actionStatus id="popupStatus" layout="block">
+                    <apex:facet name="start">
+                        <p>
+                            <div class="slds-spinner_container slds-is-fixed">
+                                <div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+                                    <span class="slds-assistive-text">Loading</span>
+                                    <div class="slds-spinner__dot-a"></div>
+                                    <div class="slds-spinner__dot-b"></div>
+                                </div>
+                            </div>
+                        </p>
+                    </apex:facet>
+                    <apex:facet name="stop"></apex:facet>
+                </apex:actionStatus>
+                <apex:outputPanel id="erorrMessage">
+                    <apex:pageMessages />
+                </apex:outputPanel>
+                <div style="text-align: center">
+                    <br/>
+                    <apex:commandButton value="Export to Excel" action="{!SelectObjectForExportToExcel}" rerender="tstpopup, erorrMessage, {!If(!displayPopup, 'exportToExcel', '')}" status="popupStatus"  style="width: 120px;" styleClass="slds-button slds-button_success"/>
+                    <apex:commandButton value="Cancel" action="{!closePopup}" rerender="tstpopup, theForm" status="popupStatus" style="width: 100px;" styleClass="slds-button slds-button_destructive"/>
+                </div>
+            </apex:outputPanel>
+            <apex:outputPanel id="exportToExcel" rendered="{!selectedObjectsList.size > 0}">
+                <script>
+                callBackFunctionExportToExcel();
+                </script>
+			</apex:outputPanel>
+            <apex:actionFunction action="{!ExportToExcel}" name="callBackFunctionExportToExcel"/>
+        </apex:outputPanel>
+    </div>
+    </apex:form>
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">Security &amp; Access Manager Functionality Copyright © 2017, Application Perfection Ltd.</p> 
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">All rights reserved.</p>
+    </body>
+</apex:page>

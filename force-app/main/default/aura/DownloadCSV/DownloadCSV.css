@@ -1,0 +1,43 @@
+.THIS .slds-table .slds-table--bordered{
+     font-weight: bold;
+    border-style: solid;
+    border-width: 1px;
+    }
+.THIS .slds-button {
+    font-weight : bold;
+}
+
+.THIS .slds-table {
+    border-style:solid;
+    border-width: 2px;
+}
+
+.THIS .slds-text-title--caps .col {
+    font-size: 18px;
+    font-weight:bold;
+    border-style:solid;
+    border-width: 1px;
+    
+}
+
+.THIS .slds-is-sortable {
+    color: #FFFFFF;
+}
+
+.THIS #MobilePhone {
+    color: #FFFFFF;
+}
+
+.THIS .slds-truncate {
+    border-style: solid;
+    border-width:1px;
+}
+
+.THIS thead {
+    background-color: #4682B4;
+}
+
+.THIS span {
+    font-size: 18px;
+    font-weight: bold;
+}

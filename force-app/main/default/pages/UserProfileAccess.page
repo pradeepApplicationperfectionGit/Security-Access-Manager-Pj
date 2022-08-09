@@ -1,0 +1,237 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-14-2021
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<apex:page controller="UserProfileAcces"  sidebar="false" showHeader="true" docType="HTML-5.0" standardStylesheets="false" lightningStyleSheets="true">
+
+	<head>
+		<title>User Profile Access</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/jquery.min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/bootstrap/bootstrap.min.js')}"/>
+		<apex:slds />
+	</head>
+	<style type="text/css">
+
+		
+		.custPopup{
+			background-color: white;
+			border-width: 2px;
+			border-style: solid;
+			z-index: 9999;
+			left: 50%;
+			padding:20px;
+			position: fixed;
+			font-size: 100%;
+			/* These are the 3 css properties you will need to change so the popup 
+			displays in the center of the screen. First set the width. Then set 
+			margin-left to negative half of what the width is. You can add 
+			the height property for a fixed size pop up if you want.*/
+			width: 600px;
+			margin-left: -250px;
+			top:100px;
+		}
+		.popupBackground{
+			background-color:black;
+			opacity: 0.20;
+			filter: alpha(opacity = 20);
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			z-index: 9998;
+		}
+
+	</style>
+	<body>
+	
+	<apex:form id="theForm">
+	<div class="slds-scope">
+		<div class="slds-page-header">
+			<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+				<div class="slds-p-horizontal_small slds-size_1-of-1">
+					<table class="slds-table slds-table_bordered " width="100%">
+						<thead>
+							<tr>
+								<th scope="col" style="text-align: left">
+									<div class="slds-truncate" title="Application Perfection">
+										<apex:image id="theLogoImage" value="{!$Resource.logoApplicationPerfection}" width="200" height="20"/>
+									</div>
+								</th>
+								<th scope="col" style="text-align: right">
+										<apex:commandLink value="Help/Training" action="{!openHelpTraining}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+							             <apex:commandLink value="Request a feature/support" action="{!openContactUSLink}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                		<apex:commandLink value="Release Notes" action="{!openReleaseNotes}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+								</th>
+								<th scope="col" style="text-align: right; width: 160px;">
+									<div class="slds-truncate" title="Security & Access Manager">
+										<apex:image id="theImage" value="{!$Resource.logo}" width="150" height="20"/>
+									</div>
+								</th>
+							</tr>
+						</thead>
+					</table>
+				</div>
+			</div>
+		</div>
+		<apex:outputPanel id="errorSection">
+			<apex:pageMessages />
+		</apex:outputPanel>
+		
+		<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+			<div class="slds-p-horizontal_small slds-size_2-of-10">
+				Type of the permission:
+			</div>
+			<div class="slds-p-horizontal_small slds-size_3-of-10" style="width: 100%">
+				<apex:selectList value="{!selectedPerm}" size="1" styleClass="slds-select">
+					<apex:selectOptions value="{!PermissionType}"/>
+					<apex:actionSupport event="onchange" rerender="theForm, profilesTable" action="{!changePermType}" status="tableStatus"/>
+				</apex:selectList>
+			</div>
+		</div>
+		
+		<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+			<div class="slds-size_1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2" >
+				<apex:outputPanel id="selectOptions" >
+					<c:MultiselectPicklist leftLabel="Available Profiles/Permission Sets"
+						leftOption="{!remainingProfileList}"
+						leftOption1=""
+						rightLabel="Selected Profiles/Permission Sets"
+						rightOption="{!selectedProfileList}"
+						size="8"
+						width="250px"/>
+				</apex:outputPanel>
+			</div>
+			<div class="slds-p-horizontal_small slds-size_1-of-2">
+				<div class="slds-col" id="buttons" style="text-align: left; padding-left: 3rem; ">
+					<br/><br/>
+					<apex:commandButton styleClass="slds-button slds-button--brand slds-not-selected" action="{!Go}" value="Go" rerender="profilesTable,errorSection, selectOptions" status="tableStatus" style="width: 180px;"/>
+					<!--<apex:commandButton styleClass="slds-button slds-button_success slds-button--brand slds-not-selected" action="{!Save}" value="Save" rerender="profilesTable,errorSection" status="tableStatus" style="width: 180px;"/>-->
+					<br/><br/>
+					<!--<apex:commandButton styleClass="slds-button slds-button_success slds-not-selected" action="{!ExportToExcel}" value="Export to Excel" style="width: 180px;"/>-->
+					<apex:commandButton styleClass="slds-button slds-button_success slds-not-selected" action="{!yesPopUp}" value="Select Profile for Export to Excel" style="width: 180px;"/>
+				</div>
+			</div>
+		</div>
+		<br/><br/>
+		<apex:actionStatus id="tableStatus" layout="block">
+			<apex:facet name="start">
+				<p >
+					<div class="slds-spinner_container slds-is-fixed">
+						<div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+							<span class="slds-assistive-text">Loading</span>
+							<div class="slds-spinner__dot-a"></div>
+							<div class="slds-spinner__dot-b"></div>
+						</div>
+					</div>
+				</p>
+			</apex:facet>
+			<apex:facet name="stop"></apex:facet>
+		</apex:actionStatus>
+		
+		<apex:outputPanel id="profilesTable">
+			<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+				<div class="slds-p-horizontal_small slds-size_1-of-1">
+					<apex:variable value="{!IF(selectedProfileIdList.size > 4, 20, 40)}" var="widField"/>
+					<div class="slds-scrollable_x" style="height: 100%; width: 100%;">
+						<div class="slds-table--header-fixed_container" style="height:450px;">
+							<div class="slds-scrollable_y" style="height:100%;">
+								<table class="slds-table slds-table_bordered slds-table_striped slds-table--header-fixed slds-table_fixed-layout">
+									<thead style="background: lightgrey;">
+										<tr class="slds-text-title_caps">
+											<th scope="col" style="width: {!widField}%;">
+												<div class="slds-truncate slds-cell-fixed slds-p-left_large" title="Profile Name">
+													Profile Field Name<br/>&nbsp;
+												</div>
+											</th>
+											<apex:variable value="{!IF(selectedProfileIdList.size > 0, (100 - widField)/selectedProfileIdList.size, 70)}" var="index"/>
+											<apex:repeat value="{!selectedProfileIdList}" var="pr">
+												<th scope="col" style="width: {!widField}%">
+													<div class="slds-align_absolute-center" style="width: {!index}%;" >
+														<div class="slds-truncate slds-cell-fixed" title="Profile Name" style="width: {!index}%; text-align: center">
+															<span style="white-space: normal;">
+																<apex:outputlink value="/{!pr}" target="_blank">
+																	<apex:outputText value="{!HTMLENCODE(profileMap[pr]['Name'])}" escape="false"/>
+																</apex:outputlink>
+															</span>
+														</div>
+													</div>
+												</th>
+											</apex:repeat>
+										</tr>
+									</thead>
+									<tbody>
+										<apex:repeat value="{!fieldNameList}" var="fieldName">
+											<tr>
+												<td title="{!fieldNameLabelMap[fieldName][0]}" style="padding-left: 1rem; width: {!widField}%">
+													<apex:outputText value="{!fieldNameLabelMap[fieldName][0]}" escape="false"/>
+												</td>
+												<apex:repeat value="{!selectedProfileIdList}" var="profileId">
+													<td data-label="Profile Name" style="width: {!index}%;">
+														<div class="slds-truncate slds-text-align_center" title="Profile Name">
+															<apex:outputText value="{!profileMap[profileId][fieldName]}" rendered="{!fieldNameLabelMap[fieldName][1] != 'boolean'}"/>
+															<apex:inputCheckbox value="{!profileMap[profileId][fieldName]}" rendered="{!fieldNameLabelMap[fieldName][1] == 'boolean'}" disabled="TRUE"/> 
+														</div>
+													</td>
+												</apex:repeat>
+											</tr>
+										</apex:repeat>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</apex:outputPanel>
+		<apex:outputPanel id="tstpopup">
+			<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+			<apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+				<c:MultiselectPicklist leftLabel="Available Profiles/Permission Sets"
+					leftOption="{!profList}"
+					leftOption1=""
+					rightLabel="Selected Profiles/Permission Sets"
+					rightOption="{!selectedProfileExcel}"
+					size="8"
+					width="180px"/>
+				<apex:actionStatus id="popupStatus" layout="block">
+					<apex:facet name="start">
+						<p >
+							<div class="slds-spinner_container slds-is-fixed">
+								<div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+									<span class="slds-assistive-text">Loading</span>
+									<div class="slds-spinner__dot-a"></div>
+									<div class="slds-spinner__dot-b"></div>
+								</div>
+							</div>
+						</p>
+					</apex:facet>
+					<apex:facet name="stop"></apex:facet>
+				</apex:actionStatus>
+				<apex:outputPanel id="erorrMessage">
+					<apex:pageMessages />
+				</apex:outputPanel>
+				<div style="text-align: center">
+					<br/>
+					<apex:commandButton value="Export to Excel" action="{!SelectProfilesForExportToExcel}" rerender="tstpopup, erorrMessage, {!If(!displayPopup, 'exportToExcel', '')}" status="popupStatus"  style="width: 120px;" styleClass="slds-button slds-button_success"/>
+					<apex:commandButton value="Cancel" action="{!closePopup}" rerender="tstpopup, theForm" status="popupStatus" style="width: 100px;" styleClass="slds-button slds-button_destructive"/>
+				</div>
+			</apex:outputPanel>
+			<apex:outputPanel id="exportToExcel" rendered="{!selectedProfileExcel.size > 0}">
+				<script>
+					callBackFunctionExportToExcel();
+				</script>
+			</apex:outputPanel>
+			<apex:actionFunction action="{!ExportToExcel}" name="callBackFunctionExportToExcel"/>
+		</apex:outputPanel>
+	</div>
+	</apex:form>
+    <p style="text-align: center; font-size: 10px; font-weight: bold;">Security &amp; Access Manager Functionality Copyright © 2017, Application Perfection Ltd.</p> 
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">All rights reserved.</p>
+	</body>
+</apex:page>

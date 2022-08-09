@@ -1,0 +1,42 @@
+<aura:component controller="RecordAccessLightning">
+    <aura:method name="doInit" description="User Role method with parameters">
+        <aura:attribute name="userID" type="String"/>
+        <aura:attribute name="objectID" type="String"/>
+        <aura:attribute name="callback" type="Function" />
+    </aura:method>
+    <aura:attribute name="userRoleWrapper" type="sObject" default="{}"/>
+    <aura:attribute name="userRoleName" type="String"/>
+	 <div class="slds-form--stacked slds-p-around--medium slds-m-bottom--x-small">
+        <div class="slds-form-element">
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-1" style="font-size: 16px;">
+                   <b>User Role: </b><ui:outputText value="{!v.userRoleWrapper.userRoleName}"/>
+                </div>
+            </div>
+        
+            <aura:iteration items="{!v.userRoleWrapper.userSharingRoleWrapperList}" var="userRole">
+                <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                    <div class="slds-p-horizontal_small slds-size_1-of-6" ></div>
+                    <div class="slds-p-horizontal_small slds-size_5-of-6" >
+                        <ui:outputText value="This record was shared with user "/>
+                        <ui:outputText value="{!userRole.userName}"/>
+                        <ui:outputText value=" - role  "/>
+                        <ui:outputText value="{!userRole.userSharingRoleName}"/>:
+                        
+                    </div>
+                </div>
+                <aura:if isTrue="{!userRole.userSharingRoleList}">
+                    <aura:iteration items="{!userRole.userSharingRoleList}" var="userSharingRole">
+                        <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                            <div class="slds-p-horizontal_small slds-size_1-of-6" ></div>
+                            <div class="slds-p-horizontal_small slds-size_5-of-6" >
+                                <ui:outputText value="- " class="padding"/>
+                                <ui:outputText value="{!userSharingRole}"/>
+                            </div>
+                        </div>
+                    </aura:iteration>
+                </aura:if>
+            </aura:iteration>
+         </div>
+    </div>
+</aura:component>

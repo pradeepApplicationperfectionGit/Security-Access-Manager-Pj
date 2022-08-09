@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>lookup__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>xscd</description>
+    <externalId>false</externalId>
+    <inlineHelpText>xscd</inlineHelpText>
+    <label>Lookup</label>
+    <referenceTo>james130__c</referenceTo>
+    <relationshipName>All_Field_Types</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+</CustomField>

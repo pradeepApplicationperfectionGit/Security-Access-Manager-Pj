@@ -1,0 +1,27 @@
+.THIS .buttonWidth {
+    width: 150px;
+}
+.THIS .divHidden {
+    display: none;
+}
+
+.THIS .divShow {
+    display: block;
+}
+
+.THIS .divHiddenPermSet {
+    display: none;
+}
+
+.THIS .divShowPermSet {
+    display: block;
+}
+
+.THIS.exampleHolder{
+    position: relative;
+    display: inline-block;
+    margin-left: 15px;
+    width: 55px;
+    vertical-align: middle;
+    white-space: nowrap;
+}

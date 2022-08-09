@@ -1,0 +1,525 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-14-2021
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<apex:page controller="ObjectsAndFieldsAccess" sidebar="false" showHeader="true" docType="HTML-5.0" standardStylesheets="false" lightningStyleSheets="true">
+	
+	<head>
+		<title>Objects and Fields Access</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/jquery.min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.jQuery, 'jQuery/bootstrap/bootstrap.min.js')}"/>
+		<apex:slds />
+	</head>
+	<style type="text/css">
+
+		
+		.custPopup{
+			background-color: white;
+			border-width: 2px;
+			border-style: solid;
+			z-index: 9999;
+			left: 50%;
+			padding:20px;
+			position: fixed;
+			font-size: 100%;
+			/* These are the 3 css properties you will need to change so the popup 
+			displays in the center of the screen. First set the width. Then set 
+			margin-left to negative half of what the width is. You can add 
+			the height property for a fixed size pop up if you want.*/
+			width: 600px;
+			margin-left: -250px;
+			top:100px;
+		}
+		.popupBackground{
+			background-color:black;
+			opacity: 0.20;
+			filter: alpha(opacity = 20);
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			top: 0;
+			left: 0;
+			z-index: 9998;
+		}
+
+	</style>
+
+	<script type="text/javascript">
+		function selectAllCheckboxes(obj, perm, index){
+			console.log('index::' + index);
+			console.log('obj.checked::' + obj.checked);
+			var myClass = 'myClass' + perm + index;
+			console.log('myClass::' + myClass);
+			var check = document.querySelectorAll('.' + myClass);
+			console.log('check ::' + check.length);
+			console.log('inputCheckBox::' + check[0].childNodes[0].checked);
+			for(var i = 0; i < check.length; i++){
+				if(check[i].childNodes[0].disabled === false) {
+					check[i].childNodes[0].checked = obj.checked;
+				} else {
+					console.log('term' + i + '::' + check[i].childNodes[0].disabled);
+				}
+			}
+		}
+	</script>
+	
+	<body>
+		<apex:form id="theForm">
+			<apex:outputPanel id="errorSection">
+				<apex:pageMessages />
+			</apex:outputPanel>
+		<div class="slds-scope">
+		
+			<div class="slds-page-header">
+				<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+					<div class="slds-p-horizontal_small slds-size_1-of-1">
+						<table class="slds-table slds-table_bordered " width="100%" rendered="{!isAccessible}">
+							<thead>
+								<tr>
+									<th scope="col" style="text-align: left">
+										<div class="slds-truncate" title="Application Perfection">
+											<apex:image id="theLogoImage" value="{!$Resource.logoApplicationPerfection}" width="200" height="20"/>
+										</div>
+									</th>
+									<th scope="col" style="text-align: right">
+                                            <apex:commandLink value="Help/Training" action="{!openHelpTraining}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                            <apex:commandLink value="Request a feature/support" action="{!openContactUSLink}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                            <apex:commandLink value="Release Notes" action="{!openReleaseNotes}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                    </th>
+									<th scope="col" style="text-align: right; width: 160px;">
+										<div class="slds-truncate" title="Security & Access Manager">
+											<apex:image id="theImage" value="{!$Resource.logo}" width="150" height="20"/>
+										</div>
+									</th>
+								</tr>
+							</thead>
+						</table>
+					</div>
+				</div>
+			</div>
+			
+				
+			<apex:outputPanel id="selectOptions" rendered="{!isAccessible}">
+				<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+					<div class="slds-size_1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+						Type of the permission: &nbsp;
+						<apex:selectList value="{!selectedPerm}" size="1" styleClass="slds-select">
+							<apex:selectOptions value="{!PermissionType}"/>
+							<apex:actionSupport event="onchange" rerender="selectOptions, profilesTable,errorSection, selectLog, buttonSection" action="{!changeType}" status="tableStatus"/>
+						</apex:selectList>
+						<c:MultiselectPicklist leftLabel="Available Profiles/Permission Sets"
+							leftOption="{!remainingProfiles}"
+							leftOption1="{!remainingProfiles1}"
+							rightLabel="Selected Profiles/Permission Sets"
+							rightOption="{!selectedProfiles}"
+							size="6"
+							width="250px"/>
+					</div>
+					<div class="slds-size_1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+						Type of the object: &nbsp;
+						<apex:selectList value="{!selectedType}" size="1" styleClass="slds-select">
+							<apex:selectOptions value="{!objectsType}"/>
+							<apex:actionSupport event="onchange" rerender="theForm" action="{!changeType}" status="tableStatus"/>
+						</apex:selectList>
+						<c:MultiselectPicklist leftLabel="Available Objects"
+							leftOption="{!remainingObjects}"
+							leftOption1="{!remainingObjects1}"
+							rightLabel="Selected Objects"
+							rightOption="{!selectedObjects}"
+							size="6"
+							width="250px"/>
+					</div>
+				</div>
+			</apex:outputPanel>
+			<br/>
+			<apex:outputPanel layout="none" id="buttonSection" rendered="{!isAccessible}">
+				<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+					<div class="slds-p-horizontal_small slds-size_1-of-5" style="padding-left: 30px">
+						<apex:commandButton action="{!Go}" value="Go" rerender="profilesTable,errorSection, selectOptions, selectLog" status="tableStatus" styleClass="slds-button slds-button--brand" style="width: 180px;" id="goId"/>
+					</div>
+					<div class="slds-p-horizontal_small slds-size_1-of-5" style="padding-left: 40px">
+						<apex:commandButton action="{!Save}" value="Save" rerender="profilesTable,errorSection, selectLog" status="tableStatus" style="width: 180px;" rendered="{!selectedLog == '' && canChange}" styleClass="slds-button slds-button_success"/>
+						<apex:commandButton action="{!RevertChanges}" status="tableStatus" rerender="profilesTable, errorSection" value="Revert Changes" style="width: 180px; padding-left: 10px" rendered="{!selectedLog != '' && selectedLog != null && canChange}" styleClass="slds-button slds-button_success"/>
+					</div>
+					<div class="slds-p-horizontal_small slds-size_1-of-5" style="padding-left: 30px">
+						<apex:commandButton action="{!ExportToExcel}" value="Export To Excel" status="tableStatus" style="width: 180px;" rendered="{!expandObject == '' || selectedLog != ''}" id="excelbutton" styleClass="slds-button slds-button--brand"/>
+						<apex:commandButton action="{!yesPopUp}" value="Select Profile for Export to Excel" reRender="tstpopup, errorMessage" status="tableStatus" rendered="{!expandObject != '' && expandObject != null && selectedLog == ''}" styleClass="slds-button slds-button--brand"/>
+					</div>
+					<div class="slds-p-horizontal_small slds-size_1-of-5" style="padding-left: 40px">
+						<!-- <apex:commandButton action="{!printPDF}" value="PDF" status="tableStatus" style="width: 180px;"/> -->
+						<apex:commandLink value="Generate PDF" action="{!printPDF}" immediate="true" target="_blank" style="text-decoration:none; width: 180px;" styleClass="slds-button slds-button--brand">
+							<apex:param name="isPdf" value="true" assignTo="{!isPdf}"/>
+						</apex:commandLink>
+					</div>
+					<div class="slds-p-horizontal_small slds-size_1-of-5" style="padding-left: 30px">
+						<apex:commandButton action="{!ExportToXML}" value="Export To XML" status="tableStatus" styleClass="slds-button slds-button--brand" style="width: 180px;" id="xmlId" />
+					</div>
+				</div>
+				<br/>
+			</apex:outputPanel>
+			<apex:outputPanel id="selectLog" rendered="{!isAccessible && canChange}">
+				<apex:outputPanel rendered="{!expandObject != '' && expandObject != null}">
+					<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+						<div class="slds-p-horizontal_small slds-size_1-of-1">
+							<table width="100%">
+								<tr>
+									<td style="padding-left: 150px;">
+										Description of change:&nbsp;&nbsp;
+										<apex:inputTextarea id="newDesc" value="{!description}" rows="1" style="width: 400px;" styleClass="slds-input"/>
+									</td>
+									<td style="text-align: right; padding-right: 30px;">
+										Please select a saved log:&nbsp;
+										<apex:selectList value="{!selectedLog}" size="1" styleClass="slds-select">
+											<apex:selectOptions value="{!optionsLog}"/>
+											<apex:actionSupport event="onchange" rerender="selectOptions, profilesTable,errorSection, selectLog, buttonSection" action="{!changeLog}" status="tableStatus"/>
+										</apex:selectList>
+									</td>
+								</tr>
+							</Table>
+						</div>
+					</div>
+				</apex:outputPanel>
+			</apex:outputPanel>
+			<br/>
+			<apex:actionStatus id="tableStatus" layout="block" rendered="{!isAccessible}">
+				<apex:facet name="start">
+					<p >
+						<div class="slds-spinner_container slds-is-fixed">
+							<div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+								<span class="slds-assistive-text">Loading</span>
+								<div class="slds-spinner__dot-a"></div>
+								<div class="slds-spinner__dot-b"></div>
+							</div>
+						</div>
+					</p>
+				</apex:facet>
+				<apex:facet name="stop"></apex:facet>
+			</apex:actionStatus>
+	<!-- ----------------- Field Permission Table  ------------- -->
+			<apex:outputPanel id="profilesTable" rendered="{!isAccessible}">
+				<apex:outputPanel rendered="{!selectedLog == ''}">
+					<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+						<div class="slds-scrollable_x" style="height: 100%; width: 100%;">
+							<div class="slds-p-horizontal_small slds-size_1-of-1">
+								<apex:variable value="{!IF(selectedProfileIdList.size > 4, 100, 100)}" var="wid"/>
+								<apex:variable value="{!IF(selectedProfileIdList.size > 4, 20, 20)}" var="widField"/>
+								<apex:variable value="{!IF(selectedProfileIdList.size > 5 , 100, wid)}" var="wid"/>
+								<apex:variable value="{!IF(selectedProfileIdList.size > 4, 20, widField)}" var="widField"/>
+								<div class="slds-table--header-fixed_container" style="height:450px; padding-top: {!IF(expandObject == '', 2 , 6)}rem; width: {!wid}%">
+									<div class="slds-scrollable_y" style="height:100%;">
+										<table class="slds-table slds-table_bordered slds-table_striped slds-table--header-fixed slds-table_col-bordered slds-table_fixed-layout" >
+											<thead style="border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: black;">
+												<tr>
+													<th scope="col" style="width: {!widField}%; border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: black;">
+														<div class="slds-truncate slds-cell-fixed slds-p-left_large" title="Object Name" style="width: {!widField}%;">
+															<b>Object Name</b><br/>
+															<apex:outputText value="{!HTMLENCODE(expandObject)}" escape="false"/><br/>
+															<apex:outputText value="Display All" escape="false" rendered="{!expandObject != ''}" style="padding-left: {!10-selectedProfileIdList.size}rem; border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: lightgrey;"/>
+                                                            <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" rendered="{!expandObject != ''}" style="height: 15px; cursor: pointer;" title="Display all fields that are currently set to READ access or EDIT access"/>
+                                                            <br/>
+															<apex:outputText value="Tick All" escape="false" rendered="{!expandObject != ''}" style="padding-left: {!10-selectedProfileIdList.size}rem;"/>
+                                                            <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" rendered="{!expandObject != ''}" style="height: 15px; cursor: pointer;" title="Check/Uncheck all Edit/Read checkboxes"/>
+														</div>
+													</th>
+													<apex:variable value="{!IF(selectedProfileIdList.size > 0, (100 - widField)/selectedProfileIdList.size, 70)}" var="index"/>
+													<apex:variable var="i" value="{!0}" />
+													<apex:repeat value="{!selectedProfileIdList}" var="pr">
+														<th scope="col" style="width: {!widField}%; border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: black; border-left-width: 1px; border-left-style: solid; border-left-color: lightgrey;">
+															<div class="slds-align_absolute-center" style="width: {!index}%;">
+																<div class="slds-cell-fixed" title="{!HTMLENCODE(profileNameMap[pr])}" id="profileName" style="width: {!index}%; text-align: center">
+																	<span style="white-space: normal;">
+																		<apex:outputlink value="/{!pr}" target="_blank">
+																			<apex:outputText value="{!HTMLENCODE(profileNameMap[pr])}" escape="false" />
+																		</apex:outputlink><br/>
+																	</span>
+																	<apex:outputPanel rendered="{!expandObject != ''}" layout="none">
+																		<div class="slds-text-align_center">
+																			<apex:outputText value="Read"/>&nbsp;
+																			<apex:outputText value="Edit"/>&nbsp;
+																			<br/>
+																			<apex:inputCheckbox value="{!readProfileSelectCheckboxMap[pr]}" rendered="{!canChange}" title="Click this checkbox to display all fields that are currently set to READ access" style="vertical-align: middle; padding: 0.1rem;">
+																				<apex:actionSupport event="onclick" action="{!readSelectOnlyRecordsWithSelectedCheckboxes}" rerender="profilesTable" status="tableStatus">
+																					<apex:param name="SelectProfileId" value="{!pr}" assignTo="{!selectProfileId}"/>
+																					<apex:param name="selectOnlySelectedCheckbox" value="{!If(readProfileSelectCheckboxMap[pr], false, true)}" assignTo="{!readSelectOnlySelectedCheckbox}"/>
+																				</apex:actionSupport>
+																			</apex:inputCheckbox>&nbsp;
+                                                                             <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" style="height: 15px; cursor: pointer;" title="Click this checkbox to display all fields that are currently set to READ access"/>
+																			<apex:inputCheckbox value="{!editProfileSelectCheckboxMap[pr]}" rendered="{!canChange}" title="Click this checkbox to display all fields that are currently set to EDIT access" style="vertical-align: middle; padding: 0.1rem;">
+																				<apex:actionSupport event="onclick" action="{!editSelectOnlyRecordsWithSelectedCheckboxes}" rerender="profilesTable" status="tableStatus">
+																					<apex:param name="SelectProfileId" value="{!pr}" assignTo="{!selectProfileId}"/>
+																					<apex:param name="selectOnlySelectedCheckbox" value="{!If(editProfileSelectCheckboxMap[pr], false, true)}" assignTo="{!editSelectOnlySelectedCheckbox}"/>
+																				</apex:actionSupport>
+																			</apex:inputCheckbox>
+                                                                             <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" style="height: 15px; cursor: pointer;" title="Click this checkbox to display all fields that are currently set to EDIT access"/>
+																			 <br/>
+																			 <apex:inputCheckbox onclick="selectAllCheckboxes(this, 'Read', '{!i}')" rendered="{!canChange}" id="readCheck" title="Click this checkbox to check/uncheck all Read checkboxes" style="vertical-align: middle; padding: 0.1rem;"/>
+																			 &nbsp;
+                                                                             <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" style="height: 15px; cursor: pointer;" title="Click this checkbox to check/uncheck all Read checkboxes"/>
+																			 <apex:inputCheckbox onclick="selectAllCheckboxes(this, 'Edit', '{!i}')" rendered="{!canChange}" id="editCheck" title="Click this checkbox to check/uncheck all Edit checkboxes" style="vertical-align: middle; padding: 0.1rem;"/>
+                                                                             <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" style="height: 15px; cursor: pointer;" title="Click this checkbox to check/uncheck all Edit checkboxes"/>
+																		</div>
+																	</apex:outputPanel>
+																</div>
+															</div>
+														</th>
+														<apex:variable var="i" value="{!i+1}" />
+													</apex:repeat>
+												</tr>
+											</thead>
+											<tbody>
+												<apex:repeat value="{!objectPermisionWList}" var="opw">
+													<tr>
+														<td scoped="col" style="width: {!widField}%" data-label="{!HTMLENCODE(opw.objLabel)}">
+															<div class="slds-truncate " title="{!HTMLENCODE(opw.objLabel)}">
+																<apex:commandLink action="{!expandObjects}" reRender="profilesTable, errorSection, selectLog, buttonSection, excelbutton" id="theCommandLink" status="tableStatus">
+																	<apex:outputText value="{!HTMLENCODE(opw.objLabel)}" escape="false"/> 
+                                                                    <apex:image value="{!URLFOR($Resource.HelpIconInGreen)}" style="height: 15px; margin-left: 2px;" title="Click on Object Name to expand Field Level Security"/>
+																	<apex:param name="expandObjectParam" value="{!HTMLENCODE(opw.objName)}" assignTo="{!expandObject}"/>
+																	<apex:outputPanel rendered="{!expandObject == null || expandObject == ''}">
+																		<!--<span class="slds-icon_container slds-icon-utility-down" title="Object">
+																			<svg aria-hidden="true" class="slds-icon slds-icon_x-small" style="fill: green;">
+																				<use xlink:href="{!URLFOR($Asset.SLDS, 'assets/icons/utility-sprite/svg/symbols.svg#down')}"></use>
+																			</svg>
+																			<span class="slds-assistive-text">Arrow down Icon</span>
+																		</span>-->
+																	</apex:outputPanel>
+																	<apex:outputPanel rendered="{!opw.objName == expandObject}">
+																		
+																	</apex:outputPanel>
+																	<apex:outputPanel rendered="{!opw.objName != expandObject && expandObject != null && expandObject != ''}">
+																		
+																	</apex:outputPanel>
+																</apex:commandLink>
+															</div>
+														</td>
+														<apex:repeat value="{!opw.objPermList}" var="p">
+															<td style="width: {!index}%; border-left-width: 1px; border-left-style: solid; border-left-color: lightgrey;">
+																<div class="slds-truncate slds-text-align_center" title="{!HTMLENCODE(opw.objLabel)} Permission">
+																	{!p}
+																</div>
+															</td>
+														</apex:repeat>
+													</tr>
+													
+													<apex:outputPanel rendered="{!expandObject == opw.objName && expandObject != ''}" layout="none" id="fieldSection">
+														
+														<apex:repeat value="{!fieldNameList}" var="field">
+															<tr>
+																<td style="width: {!widField}%;">
+																	<div class="slds-p-left_xx-large slds-truncate"  title="{!HTMLENCODE(fieldNameMap[field][0])}" style="white-space: normal;">
+																		<p>
+																			<apex:outputText value="{!HTMLENCODE(fieldNameMap[field][0])}" escape="false"/>
+																		</p>
+																	</div>
+																</td>
+																<apex:variable var="i" value="{!0}" />
+																<apex:repeat value="{!fieldPermissionMap[field]}" var="fpw">
+																	<td style="width: {!index}%">
+																		<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+																			<div class="slds-p-horizontal_small slds-size_1-of-2">
+																				<div class="slds-truncate slds-text-align_right" title="{!HTMLENCODE(fieldNameMap[field][0])} Read">
+																					<div class="myClassRead{!i}">
+																						<apex:inputCheckbox value="{!fpw.R}" disabled="{!IF(fieldNameMap[field][1] == 'false' || !canChange, true, false)}" id="readCheckID"/>
+																					</div>
+																				</div>
+																			</div>
+																			<div class="slds-p-horizontal_small slds-size_1-of-2">
+																				<div class="slds-truncate slds-text-align_left" title="{!HTMLENCODE(fieldNameMap[field][0])} Edit">
+																					<div class="myClassEdit{!i}">
+																						<apex:inputCheckbox value="{!fpw.E}" disabled="{!IF(fieldNameMap[field][1] == 'false' || !canChange, true, false)}" id="editCheckID"/>&nbsp;
+																					</div>
+																				</div>
+																			</div>
+																		</div>
+																	</td>
+																	<apex:variable var="i" value="{!i+1}" />
+																</apex:repeat>
+															</tr>
+														</apex:repeat>
+													</apex:outputPanel>
+												</apex:repeat>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</apex:outputPanel>
+		<!-- ----------------- Field Permission Table with LOG ------------- -->
+				<apex:outputPanel rendered="{!selectedLog != '' && expandObject != ''}" layout="none">
+					<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+						<div class="slds-scrollable_x" style="height: 100%; width: 100%;">
+							<div class="slds-p-horizontal_small slds-size_1-of-1">
+								<apex:variable value="{!IF(selectedProfileIdList.size > 3, 150, 100)}" var="wid"/>
+								<apex:variable value="{!IF(selectedProfileIdList.size > 4, 12, 20)}" var="widField"/>
+								<apex:variable value="{!IF(selectedProfileIdList.size > 5 , 200, wid)}" var="wid"/>
+								<apex:variable value="{!IF(selectedProfileIdList.size > 4, 10, widField)}" var="widField"/>
+								<div class="slds-table--header-fixed_container" style="height:450px; padding-top: 4rem; width: {!wid}%">
+									<div class="slds-scrollable_y" style="height:100%;">
+										
+										<table class="slds-table slds-table_bordered slds-table_striped slds-table--header-fixed slds-table_col-bordered slds-table_fixed-layout">
+											<thead>
+												<tr>
+													<th scoped="col" style="width: {!widField}%; border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: black;">
+														<div class="slds-truncate slds-cell-fixed slds-p-left_large" title="Object Name" style="width: 30%">
+															<b>Object Name</b><br/>
+															<apex:outputText value="{!HTMLENCODE(expandObject)}" escape="false"/>
+														</div>
+													</th>
+													<apex:variable value="{!IF(selectedProfileIdList.size > 0, (100 - widField)/selectedProfileIdList.size, 70)}" var="index"/>
+													<apex:repeat value="{!selectedProfileIdList}" var="pr">
+														<th scoped="col" style="border-bottom-width: 2px; border-bottom-style: solid; border-bottom-color: black;">
+															<div class="slds-cell-fixed" title="{!HTMLENCODE(profileNameMap[pr])}" style="width: {!index}%">
+																<div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center; border-left-width: 1px; border-left-style: solid; border-left-color: lightgrey;">
+																	<div class="slds-p-horizontal_small slds-size_1-of-1">
+																		<apex:outputText value="{!HTMLENCODE(profileNameMap[pr])}" escape="false"/>
+																	</div>
+																</div>
+																<div class="demo-only demo-only--sizing slds-grid slds-wrap" style="text-align: center; border-left-width: 1px; border-left-style: solid; border-left-color: lightgrey;">
+																	<div class="slds-p-horizontal_small slds-size_1-of-2">
+																		<div class="slds-text-align_center">
+																			<apex:outputText value="Read"/>
+																		</div>
+																	</div>
+																	<div class="slds-p-horizontal_small slds-size_1-of-2" style="text-align: center; border-right-width: 1px; border-right-style: solid; border-right-color: lightgrey;">
+																		<div class="slds-text-align_center">
+																			<apex:outputText value="Edit"/>
+																		</div>
+																	</div>
+																</div>
+																<div class="demo-only demo-only--sizing slds-grid slds-wrap" style="border-left-width: 1px; border-left-style: solid; border-left-color: lightgrey;">
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4" style="text-align: right">
+																		<apex:outputText value="Now" />
+																	</div>
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4">
+																		<apex:outputText value="Log" style="text-align: left"/>
+																	</div>
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4" style="text-align: right">
+																		<apex:outputText value="Now" />
+																	</div>
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4">
+																		<apex:outputText value="Log" style="text-align: left"/>
+																	</div>
+																</div>
+															</div>
+														</th>
+													</apex:repeat>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td data-label="Object Name" style="width: {!widField}%;">
+														<apex:commandLink action="{!expandObjects}" reRender="profilesTable, errorSection, selectLog" id="theCommandLink" status="tableStatus">
+															<apex:outputText value="{!HTMLENCODE(expandObject)}" escape="false"/>
+															<apex:param name="expandObjectParam" value="{!expandObject}" assignTo="{!expandObject}"/>
+															<span class="glyphicon glyphicon-triangle-top"></span>
+														</apex:commandLink>
+													</td>
+													<apex:repeat value="{!objectPermisionWList[0].objPermList}" var="pr">
+														<td style="width: {!index}%; text-align: center; border-left-width: 1px; border-left-style: solid; border-left-color: lightgrey;" data-label="Object Permission">
+															<apex:outputText value="{!pr}"/>
+														</td>
+													</apex:repeat>
+												</tr>
+												<apex:repeat value="{!fieldNameList}" var="field">
+													<tr>
+														<td style="width: {!widField}%;">
+															<div class="slds-p-left_xx-large slds-truncate" title="{!HTMLENCODE(fieldNameMap[field][0])}" style="padding-left:50px; white-space: normal;">
+																<p >
+																	<apex:outputText value="{!HTMLENCODE(fieldNameMap[field][0])}" escape="false"/>
+																</p>
+															</div>
+														</td>
+														<apex:repeat value="{!selectedProfileIdList}" var="prId">
+															<td data-label="Field Permission" style="width: {!index}%;">
+																<div class="demo-only demo-only--sizing slds-grid slds-wrap">
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4" style="background: {!IF(fielPermLogWMap[field][prId].R != fielPermLogWMap[field][prId].logR ,'#FFC7CE','')}">
+																		<div class="slds-truncate slds-text-align_right" title="{!HTMLENCODE(fieldNameMap[field][0])} Read">
+																			<apex:inputCheckbox value="{!fielPermLogWMap[field][prId].R}" style="pointer-events: none;"/>
+																		</div>
+																	</div>
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4" style="background:{!IF(fielPermLogWMap[field][prId].R != fielPermLogWMap[field][prId].logR ,'#FFC7CE','')}">
+																		<div class="slds-truncate slds-text-align_left" title="{!HTMLENCODE(fieldNameMap[field][0])} LOG Read">
+																			<apex:inputCheckbox value="{!fielPermLogWMap[field][prId].logR}" style="pointer-events: none;"/>
+																		</div>
+																	</div>
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4" style=" text-align: right; background: {!IF(fielPermLogWMap[field][prId].E != fielPermLogWMap[field][prId].logE,'#FFC7CE','')}">
+																		<div class="slds-truncate slds-text-align_right" title="{!HTMLENCODE(fieldNameMap[field][0])} Edit">
+																			<apex:inputCheckbox value="{!fielPermLogWMap[field][prId].E}" style="pointer-events: none;"/>
+																		</div>
+																	</div>
+																	<div class="slds-p-horizontal_xx-small slds-size_1-of-4" style="background: {!IF(fielPermLogWMap[field][prId].E != fielPermLogWMap[field][prId].logE,'#FFC7CE','')}">
+																		<div class="slds-truncate slds-text-align_left" title="{!HTMLENCODE(fieldNameMap[field][0])} LOG Edit">
+																			<apex:inputCheckbox value="{!fielPermLogWMap[field][prId].logE}" style="pointer-events: none;"/>
+																		</div>
+																	</div>
+																</div>
+															</td>
+														</apex:repeat>
+													</tr>
+												</apex:repeat>
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</apex:outputPanel>
+			</apex:outputPanel>
+
+			<apex:outputPanel id="tstpopup">
+				<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+				<apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+					<c:MultiselectPicklist leftLabel="Available Profiles/Permission Sets"
+						leftOption="{!profList}"
+						leftOption1=""
+						rightLabel="Selected Profiles/Permission Sets"
+						rightOption="{!selectedProfileList}"
+						size="8"
+						width="180px"/>
+					<apex:actionStatus id="popupStatus" layout="block">
+						<apex:facet name="start">
+							<p >
+								<div class="slds-spinner_container slds-is-fixed">
+									<div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+										<span class="slds-assistive-text">Loading</span>
+										<div class="slds-spinner__dot-a"></div>
+										<div class="slds-spinner__dot-b"></div>
+									</div>
+								</div>
+							</p>
+						</apex:facet>
+						<apex:facet name="stop"></apex:facet>
+					</apex:actionStatus>
+					<apex:outputPanel id="erorrMessage">
+						<apex:pageMessages />
+					</apex:outputPanel>
+					<div style="text-align: center">
+						<br/>
+						<apex:commandButton value="Export to Excel" action="{!SelectProfilesForExportToExcel}" rerender="tstpopup, erorrMessage, {!If(!displayPopup, 'exportToExcel', '')}" status="popupStatus"  style="width: 120px;" styleClass="slds-button slds-button_success"/>
+						<apex:commandButton value="Cancel" action="{!closePopup}" rerender="tstpopup, theForm" status="popupStatus" style="width: 100px;" styleClass="slds-button slds-button_destructive"/>
+					</div>
+				</apex:outputPanel>
+				<apex:outputPanel id="exportToExcel" rendered="{!selectedProfileList.size > 0 && readyToExport}">
+					<script>
+						callBackFunctionExportToExcel();
+					</script>
+				</apex:outputPanel>
+				<apex:actionFunction action="{!ExportToExcel}" name="callBackFunctionExportToExcel"/>
+			</apex:outputPanel>
+			
+			
+		</div>
+		</apex:form>
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">Security &amp; Access Manager Functionality Copyright © 2017, Application Perfection Ltd.</p> 
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">All rights reserved.</p>
+	</body>
+	
+</apex:page>

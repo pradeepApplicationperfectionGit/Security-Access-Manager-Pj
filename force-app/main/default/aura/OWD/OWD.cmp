@@ -1,0 +1,34 @@
+<aura:component controller="RecordAccessLightning">
+    <aura:method name="doInit" description="Sample method with parameters">
+        <aura:attribute name="objectName" type="String"/>
+        <aura:attribute name="objectLabel" type="String"/>
+        <aura:attribute name="callback" type="Function" />
+    </aura:method>                                            
+    <aura:attribute name="organization" type="sObject" default="{}"/>
+    
+    <div class="slds-form--stacked slds-p-around--medium slds-m-bottom--x-small">
+        <div class="slds-form-element">
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-6" style="font-size: 16px;">
+                    <b>Organization Wide Default</b>
+                </div>
+            </div>
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    Organization Name
+                </div>
+                 <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    <i>{!v.organization.organizationName}</i>
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    {!v.organization.fieldOrg}
+                </div>
+                 <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    <i>{!v.organization.defaultAccess}</i>
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>

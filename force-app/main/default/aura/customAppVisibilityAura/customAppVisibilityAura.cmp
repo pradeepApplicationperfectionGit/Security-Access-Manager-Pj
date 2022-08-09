@@ -1,0 +1,35 @@
+<aura:component controller="customAppVisibility" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >
+   
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:Attribute name="header" type="List" />
+    <aura:Attribute name="body" type="List" />
+            <aura:attribute name="showSpinner" type="Boolean" default="false" />
+
+     <aura:if isTrue="{!v.showSpinner}">
+        <lightning:spinner aura:id="spinner" variant="brand" />
+    </aura:if>
+    <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+  <thead>
+    <tr class="slds-line-height_reset">
+         <aura:iteration items="{!v.header}" var="h">
+         <th class="" scope="col">
+        <div class="slds-truncate" title="">{!h}</div>
+             
+             </th></aura:iteration>
+       
+    </tr>
+  </thead>
+  <tbody>
+      <aura:iteration items="{!v.body}" var="cont">
+    <tr class="slds-hint-parent">
+        <aura:iteration items="{!cont}" var="f">
+        <td data-label="">
+     {!f}
+            </td></aura:iteration>
+      
+    </tr>
+          </aura:iteration>
+   </tbody>
+</table>
+    
+</aura:component>

@@ -1,0 +1,6 @@
+<apex:page >
+    <div style="text-align: center; margin-top: 100px;">
+        <apex:image id="theAppLogo" value="{!$Resource.ReportManagerAppLogo}" width="300" height="200"/>
+        
+    </div>
+</apex:page>

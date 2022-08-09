@@ -1,0 +1,254 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-14-2021
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<apex:page controller="DataDictionary" sidebar="false" showHeader="true" docType="HTML-5.0" standardStylesheets="false" lightningStyleSheets="true">
+	<head>
+		<title>Data Dictionary</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<apex:includeScript value="{!URLFOR($Resource.jszip, '/jszip.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.jszip, '/jszip-load.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.jszip, '/jszip-deflate.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.jszip, '/jszip-inflate.js')}"/>
+		<apex:slds />
+		<style type="text/css">
+			.custPopup{
+				background-color: white;
+				border-width: 2px;
+				border-style: solid;
+				z-index: 9999;
+				left: 50%;
+				padding:20px;
+				position: fixed;
+				font-size: 100%;
+				/* These are the 3 css properties you will need to change so the popup 
+				displays in the center of the screen. First set the width. Then set 
+				margin-left to negative half of what the width is. You can add 
+				the height property for a fixed size pop up if you want.*/
+				width: 600px;
+				margin-left: -250px;
+				top:100px;
+			}
+			.popupBackground{
+				background-color:black;
+				opacity: 0.20;
+				filter: alpha(opacity = 20);
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				z-index: 9998;
+			}
+			
+		</style>
+		<script type="text/javascript">
+			funtion checkHowManyObjectsAreSelected() {
+				var check = document.querySelectorAll([id*="rightList"]);
+				concole.log('1111::' + check);
+			}
+		</script>
+	</head>
+	<body>
+		
+		<apex:form id="theForm">
+			<apex:pageMessages />
+			<apex:commandButton styleClass="slds-button slds-button--brand slds-not-selected" value="Create New Remote Site Settings" action="{!CreateEndpoint}" rendered="{!noEndpointMetadata}" status="tableStatus" reRender="theForm"/>
+			<apex:outputPanel rendered="{!!noEndpointMetadata}">
+				<!--<apex:actionPoller action="{!checkAsyncRequest}" interval="5" rerender="form" rendered="{!NOT(ISNULL(AsyncResult))}"/>-->
+				<apex:actionFunction name="deployZip" action="{!deployZip}" rendered="{!ISNULL(AsyncResult)}" rerender="theForm" status="tableStatus">
+					<apex:param name="data" assignTo="{!ZipData}" value=""/>
+				</apex:actionFunction>
+				<c:Zip name="generateZip" oncomplete="deployZip(data);" rendered="{!ISNULL(AsyncResult) && isDeploy && !isEdit}">
+					<c:Zipentry path="package.xml" data="{!PackageXml}"/>
+					<c:Zipentry path="objects/{!selectedObject}.object" data="{!NewDescription}"/>
+				</c:Zip>
+
+				<div class="slds-scope">
+					<div class="slds-form-element">
+						<table width="100%" class="slds-table">
+							<tr>
+								<td style="text-align: left">
+									<apex:image id="theLogoImage" value="{!$Resource.logoApplicationPerfection}" width="300" height="50"/> 
+								</td>
+								<td scope="col" style="text-align: right;">
+										<apex:commandLink value="Help/Training" action="{!openHelpTraining}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                                        <apex:commandLink value="Request a feature/support" action="{!openContactUSLink}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+                           				<apex:commandLink value="Release Notes" action="{!openReleaseNotes}"  immediate="true" target="_blank" style="text-decoration:none; background-color: #4bca81; border: none;" styleClass="slds-button slds-button--brand slds-not-selected"/>
+								</td>
+								<td style="text-align: right; width: 160px;">
+									<apex:image id="theImage" value="{!$Resource.logo}" width="200" height="50"/>
+								</td>
+							</tr>
+						</table>
+						
+						<apex:outputPanel id="errorSection">
+							<apex:pageMessages />
+						</apex:outputPanel>
+						<div class="slds-row slds-no-flex slds-grid">
+							<div class="demo-only demo-only--sizing slds-grid slds-wrap" style="width: 100%">
+								<div class="slds-p-horizontal_small slds-size_1-of-4">
+									<div class="slds-col slds-align-left slds-p-left_medium slds-p-right_xx-large" styleClass="width: 30%">
+										Type of the object: <br></br>
+										<apex:selectList value="{!selectedType}" size="1" id="IdOfSelectType" styleClass="slds-select">
+											<apex:selectOptions value="{!objectsType}"/>
+											<apex:actionSupport event="onchange" rerender="theForm, selectionTable" action="{!changeType}" status="tableStatus"/>
+										</apex:selectList>
+										<apex:selectList value="{!selectedObject}" size="1" id="IdOfSelectElement" styleClass="slds-select">
+											<apex:selectOptions value="{!objectsList}"/>
+											<apex:selectOptions value="{!objectsList1}"/>
+											<apex:actionSupport event="onchange" rerender="theForm" action="{!changeObject}" status="tableStatus"/>
+										</apex:selectList> 
+									</div>
+								</div>
+								<div class="slds-p-horizontal_small slds-size_2-of-4">
+									<div class="slds-col" id="buttons" style="text-align: center; ">
+										<apex:commandButton styleClass="slds-button slds-button--brand slds-not-selected" value="Edit" action="{!Edit}" rendered="{!!isEdit && editAccess}" status="tableStatus" reRender="theForm"/>
+										<apex:commandButton styleClass="slds-button slds-button--brand slds-not-selected" value="Export To Excel" action="{!ExportToExcel}" rendered="{!!isEdit}"/>
+										<apex:commandButton styleClass="slds-button slds-button_success slds-not-selected" value="Save Changes For Deploy" action="{!SaveMap}" rendered="{!isEdit}" status="tableStatus" reRender="theForm"/>
+										<apex:commandButton styleClass="slds-button slds-button_destructive slds-not-selected" value="Cancel" action="{!Cancel}" rendered="{!isEdit}" status="tableStatus" reRender="theForm"/>
+										<apex:commandButton styleClass="slds-button slds-button_success slds-not-selected"  onclick="generateZip();" value="Deploy" action="{!Deploy}" rendered="{!ISNULL(AsyncResult) && isDeploy && !isEdit}" status="tableStatus" reRender="theForm"/>
+										<apex:commandButton styleClass="slds-button slds-button--brand slds-not-selected" action="{!yesPopUp}" value="Select Object for Export to Excel" reRender="tstpopup, errorMessage" status="tableStatus" rendered="{!!isEdit}"/>
+										<apex:commandButton styleClass="slds-button slds-button--brand slds-not-selected" value="Report" action="{!reportSensitiveData}" status="tableStatus"/>
+									</div>
+								</div>
+								<div class="slds-p-horizontal_small slds-size_1-of-4">
+									Type of the permission:
+									<apex:selectList value="{!selectedPerm}" size="1" styleClass="slds-select">
+										<apex:selectOptions value="{!PermissionType}"/>
+										<apex:actionSupport event="onchange" rerender="theForm, selectionTable" action="{!changePermType}" status="tableStatus"/>
+									</apex:selectList>
+									<apex:selectList value="{!selectedProfile}" size="1" id="profileSelectList" styleClass="slds-select">
+										<apex:selectOptions value="{!profilesList}"/>
+										<apex:actionSupport event="onchange" rerender="theForm" action="{!retrieveRecords}" status="tableStatus"/>
+									</apex:selectList>
+								</div>
+							</div>   
+						</div>
+						<div class="slds-align_absolute-center slds-text-color_error">
+							<apex:outputText style="text-align: center; text-decoration-style: red" value="Your changes have been saved for review. To deploy your changes to the database please press Deploy." rendered="{!isDeploy && !isEdit}"/>
+						</div>
+						<br/>
+						<apex:actionStatus id="tableStatus" layout="block">
+							<apex:facet name="start">
+								<p >
+									<div class="slds-spinner_container slds-is-fixed">
+										<div role="status" class="slds-spinner slds-spinner_large">
+											<span class="slds-assistive-text">Loading</span>
+											<div class="slds-spinner__dot-a"></div>
+											<div class="slds-spinner__dot-b"></div>
+										</div>
+									</div>
+								</p>
+							</apex:facet>
+							<apex:facet name="stop"></apex:facet>
+						</apex:actionStatus>
+						<apex:outputPanel id="table" layout="block">
+							<div class="slds-table--header-fixed_container" style="height:550px;">
+								<div class="slds-scrollable" style="height:100%;">
+									<table class="slds-table slds-table_bordered slds-table_cell-buffer slds-max-medium-table_stacked-horizontal slds-table--header-fixed slds-table_fixed-layout" >
+										<thead>
+											<tr class="slds-text-title_caps">
+												<!-- <th scope="col" class="slds-cell-wrap">
+													<div class="slds-truncate" title="Action">Action</div>
+												</th> -->
+												<th scope="col" class="slds-cell-wrap" style="width: 30%">
+													<div class="slds-truncate slds-cell-fixed slds-p-top_x-small" title="Field Name"><strong>Field Name</strong></div>
+												</th>
+												<th scope="col" class="slds-cell-wrap" style="width: 30%">
+													<div class="slds-truncate slds-cell-fixed slds-p-top_x-small" title="Description"><strong>Description</strong></div>
+												</th>
+												<th scope="col" class="slds-cell-wrap" style="width: 30%">
+													<div class="slds-truncate slds-cell-fixed slds-p-top_x-small" title="Help Text"><strong>Help Text</strong></div>
+												</th>
+												<th scope="col" class="slds-cell-wrap" style="width: 10%">
+													<div class="slds-truncate slds-cell-fixed slds-p-top_xx-small" title="GDPR"><strong>Highlighted <br/>Data</strong></div>
+												</th>
+											</tr>
+										</thead>
+										<tbody>
+											<apex:repeat value="{!fieldDescriptionMap}" var="fieldName">
+												<tr>
+													<!-- <td data-label="Action" class="slds-cell-wrap">
+														<div class="slds-wrap" title="Edit">
+															<apex:commandLink value="Edit" action="{!Edit}" reRender="table" status="tableStatus"/></div>
+													</td> -->
+													<td data-label="Field Name" class="slds-cell-wrap" style="width: 30%">
+														<div class="slds-wrap" title="{!HTMLENCODE(fieldName)}"><apex:outputText value="{!HTMLENCODE(fieldName)}" escape="false" /></div>
+													</td>
+													<td data-label="Description" class="slds-cell-wrap" style="width: 30%">
+														<div class="slds-wrap" title="{!HTMLENCODE(fieldDescriptionMap[fieldName][0])}">
+															<apex:inputTextarea value="{!fieldDescriptionMap[fieldName][0]}" rows="1" style="width: 100%;" rendered="{!isEdit && fieldDescriptionMap[fieldName][2] == 'true'}"/><!-- && IF(contains(fieldName, '__c'), true, false)}-->
+															<apex:outputText value="{!HTMLENCODE(fieldDescriptionMap[fieldName][0])}" rendered="{!isEdit && fieldDescriptionMap[fieldName][2] == 'false'}"/>
+															<apex:outputText value="{!HTMLENCODE(fieldDescriptionMap[fieldName][0])}" escape="false" rendered="{!!isEdit}"/>
+														</div>
+													</td>
+													<td data-label="Help Text" class="slds-cell-wrap" style="width: 30%">
+														<div class="slds-wrap" title="{!fieldDescriptionMap[fieldName][1]}">
+															<apex:inputTextarea value="{!fieldDescriptionMap[fieldName][1]}" rendered="{!isEdit && fieldDescriptionMap[fieldName][3] == 'false'}" style="width: 100%;" rows="1"/>
+															<apex:outputText value="{!HTMLENCODE(fieldDescriptionMap[fieldName][1])}" escape="false" rendered="{!!isEdit && fieldDescriptionMap[fieldName][3] == 'false'}"/>
+														</div>
+													</td>
+													<td data-label="GDPR" class="slds-cell-wrap" style="width: 10%">
+														<apex:inputCheckbox value="{!fieldGDPRMap[fieldName]}" style="pointer-events: {!IF(!isEdit, 'none', '')};"/>
+													</td>
+												</tr>
+											</apex:repeat>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</apex:outputPanel>
+					</div>
+				</div>
+			</apex:outputPanel>
+			<apex:outputPanel id="tstpopup">
+				<apex:outputPanel styleClass="popupBackground" layout="block" rendered="{!displayPopUp}"/>
+				<apex:outputPanel styleClass="custPopup" layout="block" rendered="{!displayPopUp}">
+					<c:MultiselectPicklist leftLabel="Available Objects"
+						leftOption="{!objectsList}"
+						leftOption1=""
+						rightLabel="Selected Objects"
+						rightOption="{!selectedObjectsList}"
+						size="8"
+						width="180px"/>
+						 <div id="noOfObjects"></div>
+					<apex:actionStatus id="popupStatus" layout="block">
+						<apex:facet name="start">
+							<p >
+								<div class="slds-spinner_container slds-is-fixed">
+									<div role="status" class="slds-spinner slds-spinner_large slds-spinner_brand">
+										<span class="slds-assistive-text">Loading</span>
+										<div class="slds-spinner__dot-a"></div>
+										<div class="slds-spinner__dot-b"></div>
+									</div>
+								</div>
+							</p>
+						</apex:facet>
+						<apex:facet name="stop"></apex:facet>
+					</apex:actionStatus>
+					<apex:outputPanel id="erorrMessage">
+						<apex:pageMessages />
+					</apex:outputPanel>
+					<div style="text-align: center">
+						<br/>
+						<apex:commandButton value="Export to Excel" action="{!SelectObjectForExportToExcel}" rerender="tstpopup, erorrMessage, {!If(displayPopup == false, 'exportToExcel', '')}" status="popupStatus"  style="width: 120px;" styleClass="slds-button slds-button_success"/>
+						<apex:commandButton value="Cancel" action="{!closePopup}" rerender="tstpopup, theForm" status="popupStatus" style="width: 100px;" styleClass="slds-button slds-button_destructive"/>
+					</div>
+				</apex:outputPanel>
+				<apex:outputPanel id="exportToExcel" rendered="{!selectedObjectsList.size > 0 && isReadyToDownload}">
+					<script>
+						callBackFunctionExportToExcel();
+					</script>
+				</apex:outputPanel>
+				<apex:actionFunction action="{!ExportToExcel}" name="callBackFunctionExportToExcel"/>
+			</apex:outputPanel>
+		</apex:form>
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">Security &amp; Access Manager Functionality Copyright © 2017, Application Perfection Ltd.</p> 
+	<p style="text-align: center; font-size: 10px; font-weight: bold;">All rights reserved.</p>
+	</body>
+</apex:page>

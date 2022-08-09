@@ -1,0 +1,54 @@
+<aura:component controller="RecordAccessLightning">
+    <aura:method name="doInit" description="Sample method with parameters">
+        <aura:attribute name="userID" type="String"/>
+        <aura:attribute name="objectAPI" type="String"/>
+        <aura:attribute name="callback" type="Function" />
+    </aura:method>                                            
+    <aura:attribute name="profile" type="sObject" default="{}"/>
+    
+    <div class="slds-form--stacked slds-p-around--medium slds-m-bottom--x-small">
+        <div class="slds-form-element">
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-6" style="font-size: 16px;">
+                   <b>User Profile</b>
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6"></div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    <b>Object Permission</b>
+                </div>
+            </div>
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                   Name: {!v.profile.profileName}
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    Create: <ui:outputCheckbox value="{!v.profile.create}" />
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                     Read: <ui:outputCheckbox value="{!v.profile.read}" />
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                     Edit: <ui:outputCheckbox value="{!v.profile.edit}" />
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    Delete:  Create: <ui:outputCheckbox value="{!v.profile.del}" />
+                </div>
+            </div>
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-6"></div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6"></div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                     Modify All Data: <ui:outputCheckbox value="{!v.profile.modifyAllData}" />
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    Modify All Records: <ui:outputCheckbox value="{!v.profile.modifyAllRecords}" />
+                </div>
+                <div class="slds-p-horizontal_small slds-size_1-of-6">
+                    View All Records:<ui:outputCheckbox value="{!v.profile.viewAllRecords}" />
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>

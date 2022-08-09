@@ -1,0 +1,92 @@
+<aura:component controller="RecordAccessLightning" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global">
+    <!--Page Under Construction-->
+    <!-- Create attribute to store lookup value as a sObject--> 
+    <aura:attribute name="selectedLookUpRecord" type="sObject" default="{}"/>
+    <aura:attribute name="objectID" type="String"/>
+    <aura:attribute name="objectName" type="String"/>
+    <aura:attribute name="objectLabel" type="String"/>
+    <aura:attribute name="loaded" type="Boolean" default="true" />
+    
+    <lightning:notificationsLibrary aura:id="notifLib"/>
+    <div class="slds-scope" aura:id="pageForPrint">
+        <div class="slds-page-header">
+            <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                <div class="slds-p-horizontal_small slds-size_1-of-1">
+                    <table class="slds-table slds-table_bordered " width="100%">
+                        <thead>
+                            <tr class="slds-text-title_caps">
+                                <th scope="col" style="text-align: left">
+                                    <div class="slds-truncate" title="Logo Image">
+                                        <img src="{!$Resource.logoApplicationPerfection}" width="300" height="50"/>
+                                    </div>
+                                </th>
+                                <th scope="col" style="text-align: right">
+                                    <div class="slds-truncate" title="Logo Image">
+                                        <img src="{!$Resource.logo}" width="250" height="70"/>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+            <!-- https://www.lightningdesignsystem.com/components/lookups/ --> 
+            <div class="slds-form--stacked slds-p-around--medium slds-m-bottom--x-small">
+                <div class="slds-form-element">
+                    <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                        <div class="slds-p-horizontal_small slds-size_1-of-10">
+                        </div>
+                        <div class="slds-p-horizontal_small slds-size_1-of-4">
+                            <c:customLookup objectAPIName="User" IconName="standard:user" selectedRecord="{!v.selectedLookUpRecord}" label="User Name"/>
+                            <!-- here c: is org. namespace prefix-->
+                        </div>
+                        <div class="slds-p-horizontal_small slds-size_1-of-4">
+                            <lightning:input label="Record ID" name="objectID" placeholder="Record ID" aura:id="objectID" value="{!v.objectID}"/>
+                        </div>
+                    </div><br/>
+                    <div class="demo-only demo-only--sizing slds-grid slds-wrap">
+                        <div class="slds-p-horizontal_small slds-size_1-of-10">
+                        </div>
+                        <div class="slds-p-horizontal_small slds-size_1-of-4">
+                            <lightning:button variant="brand" label="Go" onclick="{!c.handleClick}" iconName="utility:download" iconPosition="right" class="buttonWidth"/>
+                        </div>
+                        <div class="slds-p-horizontal_small slds-size_1-of-10"/>
+                        <div class="slds-p-horizontal_small slds-size_2-of-4">
+                            <div aura:id="myDiv" class="divHidden">
+                                This is an <b>{!v.objectLabel}</b> Id. Test Object name: <b>{!v.objectName}</b>
+                            </div>
+                        </div>
+                         <div class="slds-p-horizontal_small slds-size_1-of-5">
+                            <lightning:button variant="brand" label="Generate PDF" onclick="{!c.printPdf}" iconName="utility:download" iconPosition="right" class="buttonWidth"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--Page Under Construction.--> 
+       
+                    <div aura:id="OWD" class="divHidden">
+                        <c:OWD aura:id="OWDcmp"/>
+                    </div>
+                    <div aura:id="profile" class="divHidden">
+                        <c:profileCMP aura:id="profileCmp"/>
+                    </div>
+                    <div aura:id="permSet" class="divHiddenPermSet">
+                        <c:permSetCmp aura:id="permSetCmp"/>
+                    </div>
+                    <div aura:id="userRole" class="divHidden">
+                        <c:userRoleCmp aura:id="userRoleCmp"/>
+                    </div>
+            		<div aura:id="groupSharing" class="divHidden">
+                        <c:GroupSharingCmp aura:id="groupSharingCmp"/>
+                    </div>
+            <div class="exampleHolder">
+        		<aura:if isTrue="{!v.loaded }">
+                    <aura:set attribute="else">
+                        <lightning:spinner alternativeText="Loading" />
+                    </aura:set>
+                </aura:if>
+            </div>
+        </div>
+       
+    </div>
+</aura:component>

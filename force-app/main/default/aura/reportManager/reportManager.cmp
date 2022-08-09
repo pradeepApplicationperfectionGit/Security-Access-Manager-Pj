@@ -1,0 +1,17 @@
+<!--
+Author      : Himanshu Kr. Varshney
+Description : This LC will display all the UI stuff where Users could interact.
+Dependencies: It is being used in reportManagerApplication.app, ReportManagerTab.vfp
+-->
+<aura:component implements="force:appHostable" controller="ReportManagerController">
+    <div style="text-align: center; margin-top: 100px;">
+        <img src="{!$Resource.Reportmanagerlogos}" width="300" height="30"/>
+        
+    </div>
+    <h1 style="text-align:center; font-family:verdana;">
+        Note : As a Security And Access Manager Customer you also have access to Report Manager Pro at no additional cost.
+        Please reach out for the latest package via logging a support ticket.   
+        <strong><a href="/https://applicationperfection.com/contact/">Click here</a></strong>
+    </h1>
+    
+</aura:component>
